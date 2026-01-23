@@ -1,5 +1,5 @@
 
-name: Snyk Minimal Scan
+name: Snyk Scan
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -18,28 +18,23 @@ jobs:
           node-version: 18
           cache: npm
 
-      # Create a lockfile if your repo doesn't have one
-      - name: Create lockfile if missing
+      # Create lockfile if it does NOT exist
+      - name: Ensure lockfile exists
         run: |
-          if [ -f package.json ] && [ ! -f package-lock.json ]; then
+          if [ ! -f package-lock.json ]; then
             npm install --package-lock-only
           fi
 
       # Install dependencies
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm ci
 
-      - name: Setup Snyk
-        uses: snyk/actions/setup@master
-        with:
-          snyk-version: latest
+      # Install Snyk
+      - name: Install Snyk CLI
+        run: npm install -g snyk@latest
 
+      # Run Snyk Test
       - name: Snyk Test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --json-file-output=snyk-report.json
-
-      - name: Snyk Monitor
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk monitor
+        run: snyk test

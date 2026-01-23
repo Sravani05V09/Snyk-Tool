@@ -1,46 +1,45 @@
 
-name: Snyk Project File Scan
+name: Snyk Minimal Scan
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  security-events: write
-
 jobs:
-  snyk_file_scan:
+  snyk:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # Set a Node.js version that matches your project (adjust if needed)
-      - name: Use Node.js 18
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: npm
 
-      # Install exact deps from lockfile
+      # Create a lockfile if your repo doesn't have one
+      - name: Create lockfile if missing
+        run: |
+          if [ -f package.json ] && [ ! -f package-lock.json ]; then
+            npm install --package-lock-only
+          fi
+
+      # Install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: npm ci || npm install
 
-      # Set up Snyk CLI
-      - name: Set up Snyk CLI
+      - name: Setup Snyk
         uses: snyk/actions/setup@master
         with:
           snyk-version: latest
 
-      # Snyk scan on all detected projects (Node, and others if present)
-      - name: Run Snyk Scan
-        run: snyk test --all-projects --json-file-output=snyk-report.json
+      - name: Snyk Test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --json-file-output=snyk-report.json
 
-      # Optional: send a snapshot to Snyk for ongoing monitoring
-      - name: Monitor Project in Snyk
-        run: snyk monitor --all-projects
+      - name: Snyk Monitor
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk monitor

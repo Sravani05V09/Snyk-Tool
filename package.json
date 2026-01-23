@@ -1,0 +1,14 @@
+{
+  "name": "snyk-vulnerable-demo",
+  "version": "1.0.0",
+  "description": "Intentionally vulnerable app for Snyk testing",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "4.16.0",
+    "lodash": "4.17.11",
+    "serialize-javascript": "2.1.1"
+  }
+}

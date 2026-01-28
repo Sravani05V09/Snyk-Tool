@@ -9,6 +9,6 @@
   "dependencies": {
     "express": "4.16.0",
     "lodash": "4.17.11",
-    "serialize-javascript": "2.1.1"
+    "serialize-javascript": "2.1.2"
   }
 }
